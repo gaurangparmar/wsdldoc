@@ -1,14 +1,14 @@
 <html>
 
 <head>
-    <link rel="stylesheet" type="text/css" href="bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="wsdl_style.css" />
 </head>
 
 <body>
 <div class="jumbotron">
     <div class="container">
-        <h1>${title} documentation</h1>
+        <h1>${title}</h1>
     </div>
 </div>
 
@@ -93,7 +93,7 @@
                 <#if types[name].description ??>
                     <p>${types[name].description}</p>
                 </#if>
-                <#if types[name].schema??><#if types[name].schema != ""><a href="${types[name].schema}" target="_blank">schema link</a></#if></#if>
+                <#--<#if types[name].schema??><#if types[name].schema != ""><a href="${types[name].schema}" target="_blank">schema link</a></#if></#if>-->
             </div>
             <div class="col-lg-9">
                 <#if types[name].sequence??>
@@ -104,10 +104,17 @@
                         <th>cardinality</th>
                         <th>description</th>
                         </thead>
-                        <tbody>
+                        <tbody>                        	
+                            <#assign lastChoiceGroup = "" >
                             <#list types[name].sequence as el>
+                            <#if el.choiceGroup?? && lastChoiceGroup != el.choiceGroup >
+						    <tr>
+                                <td class="col-lg-2" colspan="4">Choice of elements</td>
+                            </tr>
+                            <#assign lastChoiceGroup = el.choiceGroup >
+						    </#if>
                             <tr>
-                                <td class="col-lg-2">${el.name}</td>
+                                <td class="col-lg-2"><#if el.choiceGroup??>&nbsp;&nbsp;&nbsp;&nbsp;</#if>${el.name}</td>
                                 <td class="col-lg-2">
                                     <#if el.nativeType>
                                         <#if el.typeName??>${el.typeName}</#if>
@@ -149,7 +156,7 @@
                 <#if types[name].description ??>
                     <p>${types[name].description}</p>
                 </#if>
-                <#if types[name].schema??><#if types[name].schema != ""><a href="${types[name].schema}" target="_blank">schema link</a></#if></#if>
+                <#--<#if types[name].schema??><#if types[name].schema != ""><a href="${types[name].schema}" target="_blank">schema link</a></#if></#if>-->
             </div>
             <div class="col-lg-9">
                 <dl class="dl-horizontal">

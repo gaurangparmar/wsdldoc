@@ -6,10 +6,16 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 
+import com.itextpdf.text.*;
+import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.tool.xml.XMLWorkerHelper;
+
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -48,6 +54,7 @@ public class Main {
         options.addOption("h", "help", false, "shows this help output");
         options.addOption("s", "source", true, "one or multiple URLs with source WSDLs location; the schemas in WSDL's should have schemaLocation in order to correctly generate all the types");
         options.addOption("t", "title", true, "the title of the documentation, like \"eCompany\" (WSDL by default)");
+        options.addOption("p", "pdf", false, "to generate pdf output along with html");
 
         CommandLineParser cmdparser = new DefaultParser();
         CommandLine cmd = cmdparser.parse(options, args);
@@ -67,8 +74,8 @@ public class Main {
                 }
                 destination = dPath;
             }
-            // default filename is "index.html"
-            String filename = "index.html";
+            // default filename is "index"
+            String filename = "index";
             if (!cmd.hasOption("f")) {
                 System.out.println("# The default filename \"index.html\" will be used");
             } else {
@@ -89,11 +96,30 @@ public class Main {
             } else {
                 title = cmd.getOptionValue("t");
             }
-
-            File outputFile = new File(destination.toString() + File.separator + filename);
-
+            
+            // PDF is "false" by default
+            boolean isPDF = false;
+            if (cmd.hasOption("p")) {
+                isPDF = true;
+            }
+            String fileNameWithPath = destination.toString() + File.separator + filename;
             // generate the documentation
-            DocGenerator.generateDoc(sourceWsdlLocations, outputFile, title);
+            String generateData = DocGenerator.generateDoc(sourceWsdlLocations, title);
+            //System.out.println("generateData: "+generateData);
+            File outputFile = new File(fileNameWithPath + ".html");
+            new FileWriter(outputFile).write(generateData);
+            if(isPDF) {
+                Document document = new Document(PageSize.LETTER, 50, 50, 60, 60);
+                try {
+                    PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(new File(fileNameWithPath + ".pdf")));
+                    document.open();
+                    XMLWorkerHelper.getInstance().parseXHtml(writer, document, new StringReader(generateData));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    document.close();
+                }
+            }
 
             // copy files in "static" folder
             copyStaticFiles("bootstrap.min.css", destination.toString());

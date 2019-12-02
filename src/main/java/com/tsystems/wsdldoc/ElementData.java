@@ -21,6 +21,8 @@ public class ElementData {
 
     private String schema;
 
+    private String choiceGroup;
+
     public String getName() {
         return name;
     }
@@ -75,5 +77,13 @@ public class ElementData {
 
     public void setSchema(String schema) {
         this.schema = schema;
+    }
+
+    public String getChoiceGroup() {
+        return choiceGroup;
+    }
+
+    public void setChoiceGroup(String choiceGroup) {
+        this.choiceGroup = choiceGroup;
     }
 }

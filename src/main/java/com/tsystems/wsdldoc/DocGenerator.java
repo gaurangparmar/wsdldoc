@@ -17,13 +17,14 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateExceptionHandler;
 
-import java.io.File;
-import java.io.FileWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 /**
@@ -44,7 +45,7 @@ public class DocGenerator {
      * @param title - title of the document
      * @throws Exception
      */
-    public static void generateDoc(String[] sourceWsdlLocations, File outputFile, String title) throws Exception {
+    public static String generateDoc(String[] sourceWsdlLocations, String title) throws Exception {
         WSDLParser parser = new WSDLParser();
         List<Definitions> defsList = new ArrayList<>();
         for (String sourceWsdlLocation : sourceWsdlLocations) {
@@ -63,7 +64,7 @@ public class DocGenerator {
         Map<String, Object> rootMap = new HashMap<>();
 
         List<ServiceData> services = new ArrayList<>();
-        Map<String, TypeData> finalTypesMap = new HashMap<>();
+        Map<String, TypeData> finalTypesMap = new TreeMap<>();
 
         for (Definitions defs : defsList) {
             Map<String, TypeDefinition> mapOfOriginalTypes = TypesLocator.createMapOfOriginalTypes(defs);
@@ -85,6 +86,7 @@ public class DocGenerator {
                     md.setResponse(getComplexTypeNameOfInputOutput(output, defs, mapOfOriginalTypes, mapOfElements));
                     methods.add(md);
                 }
+                Collections.sort(methods, (m1, m2) -> m1.getName().compareTo(m2.getName()));
                 serviceData.setMethods(methods);
                 return serviceData;
             }).collect(Collectors.toList());
@@ -114,8 +116,9 @@ public class DocGenerator {
 //        List<TypeData> collect = finalTypesMap.values().stream().filter(t -> t instanceof ComplexTypeData).filter(ct -> {
 //            return ((ComplexTypeData) ct).getSequence() != null && ((ComplexTypeData) ct).getSequence().size() != 0 && ((ComplexTypeData) ct).getSequence().contains(null);
 //        }).collect(Collectors.toList());
-
-        template.process(rootMap, new FileWriter(outputFile));
+        StringWriter stringWriter = new StringWriter();
+        template.process(rootMap, stringWriter);
+        return stringWriter.toString();
     }
 
     public static ComplexTypeData getComplexTypeNameOfInputOutput(AbstractPortTypeMessage portTypeMessage, Definitions defs,

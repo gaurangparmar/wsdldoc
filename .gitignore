@@ -5,3 +5,7 @@ gradle
 *.iml
 .idea
 gen
+/bin
+.settings
+.project
+.classpath

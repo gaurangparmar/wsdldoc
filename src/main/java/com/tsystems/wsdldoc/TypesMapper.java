@@ -1,18 +1,6 @@
 package com.tsystems.wsdldoc;
 
-import com.predic8.schema.Annotation;
-import com.predic8.schema.ComplexContent;
-import com.predic8.schema.ComplexType;
-import com.predic8.schema.Derivation;
-import com.predic8.schema.Documentation;
-import com.predic8.schema.Element;
-import com.predic8.schema.Extension;
-import com.predic8.schema.Schema;
-import com.predic8.schema.SchemaComponent;
-import com.predic8.schema.Sequence;
-import com.predic8.schema.SimpleContent;
-import com.predic8.schema.SimpleType;
-import com.predic8.schema.TypeDefinition;
+import com.predic8.schema.*;
 import com.predic8.schema.restriction.BaseRestriction;
 import com.predic8.schema.restriction.facet.EnumerationFacet;
 import com.predic8.schema.restriction.facet.Facet;
@@ -160,6 +148,15 @@ public class TypesMapper {
                             sequenceResult = new ArrayList<>();
                         }
                         sequenceResult.add(ed);
+                    }
+                } else if (particle instanceof ModelGroup) {
+                    List<ElementData> tmpSequenceResult = mapComplexTypeParticles( ((ModelGroup) particle).getParticles(), mapOfOriginalTypes, mapOfElements);
+                    if(tmpSequenceResult!=null) {
+                        tmpSequenceResult.forEach(el -> el.setChoiceGroup("choice group " + tmpSequenceResult.size()));
+                        if (sequenceResult == null) {
+                            sequenceResult = new ArrayList<>();
+                        }
+                        sequenceResult.addAll(tmpSequenceResult);
                     }
                 } else {
                     System.out.println("Particle is of some other type: " + particle.getClass().getName());
